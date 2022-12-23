@@ -2,7 +2,7 @@
 # Creative Commons CC0 v1.0 Universal Public Domain Dedication. No Rights Reserved
 # Version 0.1
 
-from re import I
+
 import tkinter as tk
 from tkinter import *
 from functools import partial
