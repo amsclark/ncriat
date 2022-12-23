@@ -9,7 +9,6 @@ from functools import partial
 import sys
 import datetime
 from tkinter.ttk import Treeview
-from turtle import width
 import urllib
 import requests
 from requests.auth import HTTPBasicAuth
