@@ -14,6 +14,7 @@ import requests
 from requests.auth import HTTPBasicAuth
 from bs4 import BeautifulSoup
 import csv
+from openpyxl import load_workbook
 
 def getCaseList(first_name, last_name):
   print("getting case list")
