@@ -16,6 +16,7 @@ from bs4 import BeautifulSoup
 import lxml
 import csv
 from openpyxl import load_workbook
+import webbrowser
 
 def constructFilterWindow(root, search_button, retrieve_button, select_all_button, clear_all_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, casetree, caselistbox_frame, def_frame, first_entry_label, first_name, last_entry_label, last_name):
   root.title("Nebraska Criminal Record Information Automation Tool | Filter")
@@ -169,68 +170,110 @@ def clearAll(casetree):
 def getCaseList(first_name, last_name, user_entry, pass_entry):
   caseListData = []
   caseList = []
+  resultNumber = 0
+  currPage = 1
   first_name_string = first_name.get()
   last_name_string = last_name.get()
-  username = user_entry.get()
-  password = pass_entry.get()
-  print("getting case list for " + first_name_string + " " + last_name_string + " with username " + username + " and password " + password)
+  global justice_username 
+  justice_username = user_entry.get()
+  global justice_password
+  justice_password = pass_entry.get()
   JUSTICE_URL = 'https://www.nebraska.gov/justice/name.cgi'
   data = {
+      'start': 0,
       'party_name': last_name_string + ', ' + first_name_string,
       'indiv_entity_type': 'individual',
       'case_type': [
           'CR',
           'TR',
        ],
-      'submit_hidden': '1',
+      'submit_hidden': currPage,
       'sort': 'party_name',
       'order': 'asc',
       'year': '',
       }
-  resp = requests.post(JUSTICE_URL, timeout=180, auth=HTTPBasicAuth(username, password), data=data)
-  soup = BeautifulSoup(resp.content, 'lxml')
-  rows = soup.find_all('tr')
-  for row in rows:
+  resp_count = requests.post(JUSTICE_URL, timeout=180, auth=HTTPBasicAuth(justice_username, justice_password), data=data)
+  soup_count = BeautifulSoup(resp_count.content, 'lxml')
+  num_results_text = soup_count.find_all('strong')[0].text
+  num_results = num_results_text.split(" of ")[1].split(" Results")[0]
+  resultsPageOffsets = getOffsets(num_results, 25)
+  
+  for pageOffset in resultsPageOffsets:
+    caseListData = []
+    data['start'] = pageOffset
+    data['submit_hidden'] = currPage
+    currPage = currPage + 1
+    resp_loop = requests.post(JUSTICE_URL, timeout=180, auth=HTTPBasicAuth(justice_username, justice_password), data=data)
+    soup_loop = BeautifulSoup(resp_loop.content, 'lxml')
+    rows = soup_loop.find_all('tr')
+    for row in rows:
       cols = row.find_all('td')
       cols = [ele.text.strip() for ele in cols]
       caseListData.append([ele for ele in cols if ele]) # get rid of empty values
-  
-  for caseListDatum in caseListData:
-    if (len(caseListDatum) > 0):
-      name = caseListDatum[0].split(" (\xa0")[0]
-      party_type = caseListDatum[0].split("\xa0)\nDOB: ")[0].split(" (\xa0")[1]
-      if "DOB: "in caseListDatum[0]:
-        DOB = caseListDatum[0].split("DOB: ")[1]
-      else:
-        DOB = ""
-      county = getCountyName("".join(caseListDatum[1].split())[1:3])
-      case_num = "".join(caseListDatum[1].split())
-      caption = caseListDatum[2]
-      judge = caseListDatum[3]
-      attorney = caseListDatum[4]
-      caseListItem = (name, party_type, DOB, county, case_num, caption, judge, attorney)
-      caseList.append(caseListItem)
-      
+    
+    for caseListDatum in caseListData:
+      if (len(caseListDatum) > 0):
+        resultNumber = resultNumber + 1
+        name = caseListDatum[0].split(" (\xa0")[0]
+        party_type = caseListDatum[0].split("\xa0)\nDOB: ")[0].split(" (\xa0")[1].split("\xa0)")[0]
+        if "DOB: "in caseListDatum[0]:
+          DOB = caseListDatum[0].split("DOB: ")[1]
+        else:
+          DOB = ""
+        county = getCountyName("".join(caseListDatum[1].split())[1:3])
+        case_num = "".join(caseListDatum[1].split())
+        caption = caseListDatum[2]
+        judge = caseListDatum[3]
+        attorney = caseListDatum[4]
+        caseListItem = (resultNumber, name, party_type, DOB, county, case_num, caption, judge, attorney)
+        caseList.append(caseListItem)
 
   return caseList
 
-def updateCaseList():
-  print("updating case list")
 
-def getCases(casetree):
+def getCases(casetree, first_name, last_name):
   print("getting cases")
+  fullCaseNums = []
   selected_cases = casetree.selection()
-  print(selected_cases)
-
+  for selected_case in selected_cases:
+    case_text = casetree.item(selected_case, "values")
+    fullCaseNums.append(case_text[5])
+  processCases(first_name.get(), last_name.get(), fullCaseNums)
   
 
-def getCase():
-  print("getting case ")
+def processCases(first_name, last_name, fullCaseNums):
+  # open the workbook with openpyxl here
+  wb = load_workbook('Case Details.xlsx')
+  ws = wb['JusticeData']
+  xl_row = 2
+  for fullCaseNum in fullCaseNums:
+    i = str(xl_row)
+    ws['A' + i] = fullCaseNum
+    xl_row = xl_row + 1
+  fp = "criminal_cases_for_" + first_name + "_" + last_name + "_generated_on_" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + ".xlsx"
+  wb.save(fp)
+  webbrowser.open(fp)
+  
 
-def extractInfo():
+
+def getOffsets(numResults, limitPerPage):
+  offsetsList = []
+  number_of_offsets = int(int(numResults)/limitPerPage) + 1
+  for x in range(number_of_offsets):
+    offsetsList.append(x * limitPerPage)
+  return offsetsList
+
+def getCaseSoup(fullCaseNum):
+  print("getting case " + fullCaseNum)
+  #code to pull the docket page into a beautifulSoup goes here
+  # should hopefully be able to access justice_username and justice_password as globals here
+  return "beautiful soup for " + fullCaseNum + " goes here"
+
+def extractInfo(caseSoup):
   print("extracting info from")
+  return "extracted info"
 
-def createSpreadsheet():
+def appendCaseToSpreadsheet(extractedInfo):
   print("creating spreadsheet")
 
 
@@ -239,7 +282,7 @@ def createSpreadsheet():
 root = tk.Tk()
 
 #buttons to press
-retrieve_button = tk.Button(text="Retrieve Cases", command=lambda: getCases(casetree))
+retrieve_button = tk.Button(text="Retrieve Cases", command=lambda: getCases(casetree, first_name, last_name))
 select_all_button = tk.Button(text="Select All", command=lambda: selectAll(casetree))
 clear_all_button = tk.Button(text="Clear Selection", command=lambda: clearAll(casetree))
 search_button = tk.Button(text="Search Cases", command=lambda: constructFilterWindow(root, search_button, retrieve_button, select_all_button, clear_all_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, casetree, caselistbox_frame, def_frame, first_entry_label, first_name, last_entry_label, last_name))
@@ -264,8 +307,9 @@ last_name=Entry(def_frame)
 caselistbox_frame = LabelFrame(root, text = "Cases list", padx=5, pady=5, relief=RIDGE)
 
 
-columns = ("party_name", "party_type", "DOB", "county", "case_num", "caption", "judge", "attorney")
+columns = ("resultNumber", "party_name", "party_type", "DOB", "county", "case_num", "caption", "judge", "attorney")
 casetree = Treeview(caselistbox_frame, columns=columns, show='headings')
+casetree.heading('resultNumber', text="#")
 casetree.heading('party_name', text="Party Name")
 casetree.heading('party_type', text="Party Type")
 casetree.heading('DOB', text="DOB")
