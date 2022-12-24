@@ -18,6 +18,8 @@ import csv
 from openpyxl import load_workbook
 import webbrowser
 
+from patternfuncs import *
+
 def constructFilterWindow(root, search_button, retrieve_button, select_all_button, clear_all_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, casetree, caselistbox_frame, def_frame, first_entry_label, first_name, last_entry_label, last_name):
   root.title("Nebraska Criminal Record Information Automation Tool | Filter")
   # remove all the elements from the previous view
@@ -178,7 +180,7 @@ def getCaseList(first_name, last_name, user_entry, pass_entry):
   justice_username = user_entry.get()
   global justice_password
   justice_password = pass_entry.get()
-  JUSTICE_URL = 'https://www.nebraska.gov/justice/name.cgi'
+  JUSTICE_SEARCH_URL = 'https://www.nebraska.gov/justice/name.cgi'
   data = {
       'start': 0,
       'party_name': last_name_string + ', ' + first_name_string,
@@ -192,7 +194,7 @@ def getCaseList(first_name, last_name, user_entry, pass_entry):
       'order': 'asc',
       'year': '',
       }
-  resp_count = requests.post(JUSTICE_URL, timeout=180, auth=HTTPBasicAuth(justice_username, justice_password), data=data)
+  resp_count = requests.post(JUSTICE_SEARCH_URL, timeout=180, auth=HTTPBasicAuth(justice_username, justice_password), data=data)
   soup_count = BeautifulSoup(resp_count.content, 'lxml')
   num_results_text = soup_count.find_all('strong')[0].text
   num_results = num_results_text.split(" of ")[1].split(" Results")[0]
@@ -203,7 +205,7 @@ def getCaseList(first_name, last_name, user_entry, pass_entry):
     data['start'] = pageOffset
     data['submit_hidden'] = currPage
     currPage = currPage + 1
-    resp_loop = requests.post(JUSTICE_URL, timeout=180, auth=HTTPBasicAuth(justice_username, justice_password), data=data)
+    resp_loop = requests.post(JUSTICE_SEARCH_URL, timeout=180, auth=HTTPBasicAuth(justice_username, justice_password), data=data)
     soup_loop = BeautifulSoup(resp_loop.content, 'lxml')
     rows = soup_loop.find_all('tr')
     for row in rows:
@@ -232,7 +234,6 @@ def getCaseList(first_name, last_name, user_entry, pass_entry):
 
 
 def getCases(casetree, first_name, last_name):
-  print("getting cases")
   fullCaseNums = []
   selected_cases = casetree.selection()
   for selected_case in selected_cases:
@@ -242,18 +243,51 @@ def getCases(casetree, first_name, last_name):
   
 
 def processCases(first_name, last_name, fullCaseNums):
+  JUSTICE_CASE_URL = "https://www.nebraska.gov/justice/case.cgi"
   # open the workbook with openpyxl here
   wb = load_workbook('Case Details.xlsx')
   ws = wb['JusticeData']
   xl_row = 2
   for fullCaseNum in fullCaseNums:
+    data = {
+      "case_number": fullCaseNum
+      }
+    resp_docket = requests.post(JUSTICE_CASE_URL, timeout=180, auth=HTTPBasicAuth(justice_username, justice_password), data=data)
+    soup_docket = BeautifulSoup(resp_docket.content, 'lxml')
+    docket_blocks = soup_docket.find_all('pre')
+    num_pre_blocks = len(docket_blocks)
     i = str(xl_row)
     ws['A' + i] = fullCaseNum
+    ws['B' + i] = getCountyOrDistrict(docket_blocks[0].get_text())
+    ws['C' + i] = getCountyFromCaption(docket_blocks[0].get_text())
+    ws['D' + i] = getCaseNumber(docket_blocks[0].get_text())
+    ws['E' + i] = "Docket NUmber"
+    ws['F' + i] = getCaseTitle(docket_blocks[0].get_text())
+    #other columns [B, C, D, E, F, G, etc] goes here. need to pull from each case
+    # and pull each case with individual request to docket page based on case number
+    # potential improvement idea later in project: can I use process multithreading to 
+    # pull multiple cases at the same time?
+    # information that Emily said to include is:
+    # name, dob, county, case number, docket number, prosecutor (city or county)
+    # conviction (include everythign conviction at trial, guilty plea, dismissal, acquittal)
+    # level of offense: misd, fel, infraction
+    # sentence
+    # details related to sentence: jail time? more than 1 year? probation satisfactorily completed?
+    # fine paid?
+    # already set aside?
+    # fines paid (or not). Shows under 'city fines' it will actually appear in two 
+    # places, history and ledger blocks
+    # pull raw text as well
+    # because we are doing data entry into Pika, try to keep order of fields in spreadsheet matching order of fields in Pika
+    #
+    # maybe start with raw text since that's what I'll extract from.
+
     xl_row = xl_row + 1
   fp = "criminal_cases_for_" + first_name + "_" + last_name + "_generated_on_" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + ".xlsx"
   wb.save(fp)
   webbrowser.open(fp)
   
+
 
 
 def getOffsets(numResults, limitPerPage):
