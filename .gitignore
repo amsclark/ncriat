@@ -128,3 +128,9 @@ dmypy.json
 # Pyre type checker
 .pyre/
 /~$Case Details.xlsx
+
+# LibreOffice Lock Files
+.~lock.*
+
+# application output files
+criminal_cases_for*

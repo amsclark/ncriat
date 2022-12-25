@@ -115,10 +115,28 @@ def getFines(docket_block):
       fines_string = fines_string + " " + fine.group() + ","
     fines_string = fines_string.strip(",").strip()
     return fines_string
+
+def getFeesAndFines(ledgerTable):
+  feesAndFines = 0.00
+  rows = ledgerTable.find('tbody').find_all('tr')
+  for row in rows:
+    cells = row.find_all("td")
+    if (len(cells[0].get_text().strip()) == 0):
+      feesAndFines = feesAndFines + float(cells[4].get_text().strip().strip('$'))
+  return "$" + str(feesAndFines)
+
+def getPayments(ledgerTable):
+  paymentsMade = 0.00
+  rows = ledgerTable.find('tbody').find_all('tr')
+  for row in rows:
+    cells = row.find_all("td")
+    if (len(cells[0].get_text().strip()) > 0):
+      paymentsMade = paymentsMade + float(cells[4].get_text().strip().strip('$'))
+  return "$" + str(paymentsMade)
   
 def getJailSentence(docket_block):
   #this is broken, not matching across line breaks
-  pattern = "(Jail Sentence|Cust Dept Corrections)\s*Start Date \d\d\/\d\d\/\d\d\d\d\s*Term of\s*\d*\s(Days|Weeks|Months|Years|days|weeks|months|years)"
+  pattern = "(Jail Sentence|Cust Dept Corrections)\s*Start Date \d\d\/\d\d\/\d\d\d\d\s*Term of\s*\d{1,3}\s(Days|Weeks|Months|Years|days|weeks|months|years)"
   x = re.search(pattern, docket_block)
   if (x is None):
     return ""
@@ -126,6 +144,24 @@ def getJailSentence(docket_block):
     y = re.finditer(pattern, docket_block)
     jail_string = ""
     for sentence in y:
-      jail_string = jail_string + " " + sentence.group() + ","
+      jail_string = jail_string + " " + sentence.group() + ",\n"
     jail_string = jail_string.strip(",").strip()
     return jail_string
+  
+
+def getSentenceYears(docket_block):
+  pattern = "(Jail Sentence|Cust Dept Corrections)\s*Start Date \d\d\/\d\d\/\d\d\d\d\s*Term of\s*\d*\s(Years|years)"
+  x = re.search(pattern, docket_block)
+  if (x is None):
+    return "OK - 'Years' keyword not found"
+  else:
+    y = re.finditer(pattern, docket_block)
+    years_string = ""
+    for sentence in y:
+      years_string = years_string + " " + sentence.group().split('Term of')[1].strip() + ",\n"
+    years_string = years_string.strip(",").strip()
+
+    if (years_string.strip().strip(",") == "01 Years"):
+      return "Manually Verify 1 year sentence (not greater)."
+    else: 
+      return years_string
