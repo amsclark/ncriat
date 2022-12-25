@@ -261,26 +261,30 @@ def processCases(first_name, last_name, fullCaseNums):
     ws['B' + i] = getCountyOrDistrict(docket_blocks[0].get_text())
     ws['C' + i] = getCountyFromCaption(docket_blocks[0].get_text())
     ws['D' + i] = getCaseNumber(docket_blocks[0].get_text())
-    ws['E' + i] = "Docket NUmber"
-    ws['F' + i] = getCaseTitle(docket_blocks[0].get_text())
-    #other columns [B, C, D, E, F, G, etc] goes here. need to pull from each case
-    # and pull each case with individual request to docket page based on case number
-    # potential improvement idea later in project: can I use process multithreading to 
-    # pull multiple cases at the same time?
-    # information that Emily said to include is:
-    # name, dob, county, case number, docket number, prosecutor (city or county)
-    # conviction (include everythign conviction at trial, guilty plea, dismissal, acquittal)
-    # level of offense: misd, fel, infraction
-    # sentence
-    # details related to sentence: jail time? more than 1 year? probation satisfactorily completed?
-    # fine paid?
-    # already set aside?
-    # fines paid (or not). Shows under 'city fines' it will actually appear in two 
-    # places, history and ledger blocks
-    # pull raw text as well
-    # because we are doing data entry into Pika, try to keep order of fields in spreadsheet matching order of fields in Pika
+    ws['E' + i] = getCaseTitle(docket_blocks[0].get_text())
+    ws['F' + i] = getClassification(docket_blocks[0].get_text())
+    ws['G' + i] = getFilingDate(docket_blocks[0].get_text()) 
+    ws['H' + i] = getProsecutor(docket_blocks[0].get_text())
+    ws['I' + i] = getCaseStatus(docket_blocks[0].get_text())
+    ws['J' + i] = getStatusDate(docket_blocks[0].get_text())
+    ws['K' + i] = getDisposition(docket_blocks[0].get_text())
+    
+    offense_info_block = docket_blocks[2]
+    ws['L' + i] = offense_info_block.get_text()
+    
+    register_of_actions_block = docket_blocks[5]
+    ws['M' + i] = getRegisterFinesPaid(docket_blocks[5].get_text())
+    
+    ws['N' + i] = getFines(offense_info_block.get_text())
+
+    ws['O' + i] = getJailSentence(offense_info_block.get_text())
+    # jail time
+    # more than 1 year
+    #probation satisfied
+
+  
+    # rearrange columns to match Pika data entry order
     #
-    # maybe start with raw text since that's what I'll extract from.
 
     xl_row = xl_row + 1
   fp = "criminal_cases_for_" + first_name + "_" + last_name + "_generated_on_" + datetime.datetime.now().strftime('%Y-%m-%d-%H-%M') + ".xlsx"
