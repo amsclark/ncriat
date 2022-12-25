@@ -134,3 +134,5 @@ dmypy.json
 
 # application output files
 criminal_cases_for*
+
+/.vs
