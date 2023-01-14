@@ -128,11 +128,19 @@ def processCases(first_name, last_name, fullCaseNums):
     ws['M' + i] = getDisposition(docket_blocks[0].get_text())
     ws['N' + i] = getRegisterFinesPaid(docket_blocks[5].get_text())
     ws['O' + i] = getFines(offense_info_block.get_text())
-    ws['P' + i] = getPayments(ledgerTable)
-    ws['Q' + i] = getFeesAndFines(ledgerTable)
+    try:
+      ws['P' + i] = getPayments(ledgerTable)
+      ws['Q' + i] = getFeesAndFines(ledgerTable)
+    except NameError:
+      print("No Ledger Table")
+    else:
+      ws['P' + i] = ""
+      ws['Q' + i] = ""
     ws['R' + i] = getJailSentence(offense_info_block.get_text())
     ws['S' + i] = getSentenceYears(offense_info_block.get_text())
-    ws['T' + i] = soup_docket.find_all('table')[0].get_text()# payments made to the court
+    ws['T' + i] = getProbationTerminated(register_of_actions_block.get_text()) # probation terminated
+    ws['U' + i] = getSetAside(offense_info_block.get_text()) # judgment set aside
+    ws['V' + i] = soup_docket.find_all('table')[0].get_text()# payments made to the court
 
     #parties/attorneys to the case section is not pulled
 
@@ -141,7 +149,7 @@ def processCases(first_name, last_name, fullCaseNums):
     # court costs information section not pulled 
     #financial activity section not pulled
     # Costs for Recovery table not pulled. This is not always present
-    ws['U' + i] = register_of_actions_block.get_text()
+    ws['W' + i] = register_of_actions_block.get_text()
     #probation/community service satisfied? house arrest?
     #
     # todo: rearrange columns to match Pika data entry order

@@ -165,3 +165,24 @@ def getSentenceYears(docket_block):
       return "Manually Verify 1 year sentence (not greater)."
     else: 
       return years_string
+    
+    
+def getProbationTerminated(docket_block):
+  pattern = "\d\d\/\d\d\/\d\d\d\d Probation Terminated"
+  x = re.search(pattern, docket_block)
+  if (x is None):
+    return ""
+  else:
+    matching_line = x.group()
+    return matching_line.strip()
+    
+  
+  
+def getSetAside(docket_block):
+  pattern = "Judgment Set Aside"
+  x = re.search(pattern, docket_block)
+  if (x is None):
+    return ""
+  else:
+    matching_line = x.group()
+    return matching_line.strip()
