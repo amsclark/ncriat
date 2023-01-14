@@ -113,32 +113,34 @@ def processCases(first_name, last_name, fullCaseNums):
     register_of_actions_block = docket_blocks[5]
     
     i = str(xl_row)
-    ws['A' + i] = fullCaseNum
-    ws['B' + i] = getCountyOrDistrict(docket_blocks[0].get_text())
+    ws['A' + i] = getCaseTitle(docket_blocks[0].get_text())
+    ws['B' + i] = getClassification(docket_blocks[0].get_text())
     ws['C' + i] = getCountyFromCaption(docket_blocks[0].get_text())
-    ws['D' + i] = getCaseNumber(docket_blocks[0].get_text())
-    ws['E' + i] = getCaseTitle(docket_blocks[0].get_text())
-    ws['F' + i] = getClassification(docket_blocks[0].get_text())
-    ws['G' + i] = getFilingDate(docket_blocks[0].get_text()) 
-    ws['H' + i] = getProsecutor(docket_blocks[0].get_text())
-    ws['I' + i] = getCaseStatus(docket_blocks[0].get_text())
-    ws['J' + i] = getStatusDate(docket_blocks[0].get_text())
-    ws['K' + i] = getDisposition(docket_blocks[0].get_text())
-    ws['L' + i] = getRegisterFinesPaid(docket_blocks[5].get_text())
-    ws['M' + i] = getFines(offense_info_block.get_text())
-    ws['N' + i] = getPayments(ledgerTable)
-    ws['O' + i] = getFeesAndFines(ledgerTable)
-    ws['P' + i] = getJailSentence(offense_info_block.get_text())
-    ws['Q' + i] = getSentenceYears(offense_info_block.get_text())
-    ws['R' + i] = docket_blocks[0].get_text() #case summary
+    ws['D' + i] = getCountyOrDistrict(docket_blocks[0].get_text())
+    ws['E' + i] = getCaseNumber(docket_blocks[0].get_text())
+    ws['F' + i] = getProsecutor(docket_blocks[0].get_text())
+    ws['G' + i] = offense_info_block.get_text() # Offense Information  
+    ws['H' + i] = docket_blocks[0].get_text() #case summary  
+    ws['I' + i] = fullCaseNum
+    ws['J' + i] = getFilingDate(docket_blocks[0].get_text()) 
+    ws['K' + i] = getCaseStatus(docket_blocks[0].get_text())
+    ws['L' + i] = getStatusDate(docket_blocks[0].get_text())
+    ws['M' + i] = getDisposition(docket_blocks[0].get_text())
+    ws['N' + i] = getRegisterFinesPaid(docket_blocks[5].get_text())
+    ws['O' + i] = getFines(offense_info_block.get_text())
+    ws['P' + i] = getPayments(ledgerTable)
+    ws['Q' + i] = getFeesAndFines(ledgerTable)
+    ws['R' + i] = getJailSentence(offense_info_block.get_text())
+    ws['S' + i] = getSentenceYears(offense_info_block.get_text())
+    ws['T' + i] = soup_docket.find_all('table')[0].get_text()# payments made to the court
+
     #parties/attorneys to the case section is not pulled
-    ws['S' + i] = offense_info_block.get_text() # Offense Information
+
     # arresting officers information not pulled
     # warrant information not pulled
     # court costs information section not pulled 
     #financial activity section not pulled
     # Costs for Recovery table not pulled. This is not always present
-    ws['T' + i] = soup_docket.find_all('table')[0].get_text()# payments made to the court
     ws['U' + i] = register_of_actions_block.get_text()
     #probation/community service satisfied? house arrest?
     #
