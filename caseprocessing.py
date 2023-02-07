@@ -98,6 +98,7 @@ def processCases(first_name, last_name, fullCaseNums):
   ws = wb['JusticeData']
   xl_row = 2
   for fullCaseNum in fullCaseNums:
+    print("Retrieving " + fullCaseNum)
     data = {
       "case_number": fullCaseNum
       }

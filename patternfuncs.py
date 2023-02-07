@@ -122,7 +122,10 @@ def getFeesAndFines(ledgerTable):
   for row in rows:
     cells = row.find_all("td")
     if (len(cells[0].get_text().strip()) == 0):
-      feesAndFines = feesAndFines + float(cells[4].get_text().strip().strip('$'))
+      try:
+        feesAndFines = feesAndFines + float(cells[4].get_text().strip().strip('$').replace(',',""))
+      except ValueError:
+        feesAndFines = "Could not parse fees and fines"
   return "$" + str(feesAndFines)
 
 def getPayments(ledgerTable):
@@ -131,7 +134,10 @@ def getPayments(ledgerTable):
   for row in rows:
     cells = row.find_all("td")
     if (len(cells[0].get_text().strip()) > 0):
-      paymentsMade = paymentsMade + float(cells[4].get_text().strip().strip('$'))
+      try:
+        paymentsMade = paymentsMade + float(cells[4].get_text().strip().strip('$').replace(',',""))
+      except ValueError:
+        paymentsMade = "Could not parse payments made"
   return "$" + str(paymentsMade)
   
 def getJailSentence(docket_block):
