@@ -2,7 +2,7 @@ from caseprocessing import *
 from patternfuncs import *
 from auxfuncs import *
 
-def constructFilterWindow(root, search_button, retrieve_button, select_all_button, clear_all_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, casetree, caselistbox_frame, def_frame, first_entry_label, first_name, last_entry_label, last_name):
+def constructFilterWindow(root, search_button, retrieve_button, select_all_button, clear_all_button, return_to_main_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, casetree, caselistbox_frame, def_frame, first_entry_label, first_name, last_entry_label, last_name):
   root.title("Nebraska Criminal Record Information Automation Tool | Filter")
   # remove all the elements from the previous view
   cred_frame.grid_remove()
@@ -25,8 +25,38 @@ def constructFilterWindow(root, search_button, retrieve_button, select_all_butto
   retrieve_button.grid(row=7, column=1, sticky="W", padx=10, pady=10)
   select_all_button.grid(row=7, column=2, sticky="W", padx=10, pady=10)
   clear_all_button.grid(row=7, column=3, sticky="W", padx=10, pady=10)
+  return_to_main_button.grid(row=7, column=4, sticky="W", padx=10, pady=10)
 
-    
+def returnToMainWindow(root, search_button, retrieve_button, select_all_button, clear_all_button, return_to_main_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, casetree, caselistbox_frame, def_frame, first_entry_label, last_entry_label, first_name, last_name):
+  from tkinter import Entry
+  retrieve_button.grid_remove()
+  select_all_button.grid_remove()
+  clear_all_button.grid_remove()
+  return_to_main_button.grid_remove()
+  for item in casetree.get_children():
+      casetree.delete(item)
+  casetree.grid_remove()
+  caselistbox_frame.grid_remove()
+  root.title("Nebraska Criminal Record Information Automation Tool | Login")
+  cred_frame.grid(row=0, column=1, rowspan=5, padx=10, pady=10)
+  user_entry_label.grid(row=0, column=0, sticky="W")
+  user_entry.grid(row=0, column=1, sticky="W")
+  pass_entry_label.grid(row=1, column=0, sticky="W")
+  pass_entry.grid(row=1, column=1, sticky="W")
+
+  def_frame.grid(row=0, column=2, rowspan=5, padx=10, pady=10)
+  first_name.delete(0, 'end')
+  first_entry_label.grid(row=0, column=0, sticky="W")
+  first_name.grid(row=0, column=1, sticky="W")
+  last_name.delete(0, 'end')
+  last_entry_label.grid(row=1, column=0, sticky="W")
+  last_name.grid(row=1, column=1, sticky="W")
+
+  search_button.grid(row=7, column=1, sticky="W", padx=10, pady=10)
+
+  
+  
+
 
 def constructMainWindow(root, search_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, def_frame, first_entry_label, first_name, last_entry_label, last_name):
   root.title("Nebraska Criminal Record Information Automation Tool | Login") 

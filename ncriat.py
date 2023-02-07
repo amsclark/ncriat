@@ -29,7 +29,8 @@ root = tk.Tk()
 retrieve_button = tk.Button(text="Retrieve Cases", command=lambda: getCases(casetree, first_name, last_name))
 select_all_button = tk.Button(text="Select All", command=lambda: selectAll(casetree))
 clear_all_button = tk.Button(text="Clear Selection", command=lambda: clearAll(casetree))
-search_button = tk.Button(text="Search Cases", command=lambda: constructFilterWindow(root, search_button, retrieve_button, select_all_button, clear_all_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, casetree, caselistbox_frame, def_frame, first_entry_label, first_name, last_entry_label, last_name))
+search_button = tk.Button(text="Search Cases", command=lambda: constructFilterWindow(root, search_button, retrieve_button, select_all_button, clear_all_button, return_to_main_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, casetree, caselistbox_frame, def_frame, first_entry_label, first_name, last_entry_label, last_name))
+return_to_main_button = tk.Button(text="Return to Main", command=lambda: returnToMainWindow(root, search_button, retrieve_button, select_all_button, clear_all_button, return_to_main_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, casetree, caselistbox_frame, def_frame, first_entry_label, last_entry_label, first_name, last_name))
 
 # credentials
 cred_frame = LabelFrame(root, text="Justice Login Credentials", padx=5, pady=5, relief=RIDGE)
