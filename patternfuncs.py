@@ -126,7 +126,7 @@ def getFeesAndFines(ledgerTable):
         feesAndFines = feesAndFines + float(cells[4].get_text().strip().strip('$').replace(',',""))
       except ValueError:
         feesAndFines = "Could not parse fees and fines"
-  return "$" + str(feesAndFines)
+  return str(feesAndFines)
 
 def getPayments(ledgerTable):
   paymentsMade = 0.00
@@ -138,7 +138,7 @@ def getPayments(ledgerTable):
         paymentsMade = paymentsMade + float(cells[4].get_text().strip().strip('$').replace(',',""))
       except ValueError:
         paymentsMade = "Could not parse payments made"
-  return "$" + str(paymentsMade)
+  return str(paymentsMade)
   
 def getJailSentence(docket_block):
   #this is broken, not matching across line breaks

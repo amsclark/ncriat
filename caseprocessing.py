@@ -133,10 +133,9 @@ def processCases(first_name, last_name, fullCaseNums):
       ws['P' + i] = getPayments(ledgerTable)
       ws['Q' + i] = getFeesAndFines(ledgerTable)
     except NameError:
+      ws['P' + i] = "No ledger Table"
+      ws['Q' + i] = "No ledger Table"
       print("No Ledger Table")
-    else:
-      ws['P' + i] = ""
-      ws['Q' + i] = ""
     ws['R' + i] = getJailSentence(offense_info_block.get_text())
     ws['S' + i] = getSentenceYears(offense_info_block.get_text())
     ws['T' + i] = getProbationTerminated(register_of_actions_block.get_text()) # probation terminated

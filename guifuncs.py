@@ -26,7 +26,7 @@ def constructFilterWindow(root, search_button, retrieve_button, select_all_butto
   select_all_button.grid(row=7, column=2, sticky="W", padx=10, pady=10)
   clear_all_button.grid(row=7, column=3, sticky="W", padx=10, pady=10)
 
-  
+    
 
 def constructMainWindow(root, search_button, cred_frame, user_entry_label, user_entry, pass_entry_label, pass_entry, def_frame, first_entry_label, first_name, last_entry_label, last_name):
   root.title("Nebraska Criminal Record Information Automation Tool | Login") 
