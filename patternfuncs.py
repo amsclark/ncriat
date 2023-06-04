@@ -125,7 +125,8 @@ def getFeesAndFines(ledgerTable):
       try:
         feesAndFines = feesAndFines + float(cells[4].get_text().strip().strip('$').replace(',',""))
       except ValueError:
-        feesAndFines = "Could not parse fees and fines"
+        print("Could not parse a fee or fine due to a ValueError. Using 0.00")
+        feesAndFines = feesAndFines + 0.00
   return str(feesAndFines)
 
 def getPayments(ledgerTable):
@@ -137,7 +138,11 @@ def getPayments(ledgerTable):
       try:
         paymentsMade = paymentsMade + float(cells[4].get_text().strip().strip('$').replace(',',""))
       except ValueError:
-        paymentsMade = "Could not parse payments made"
+        print("Could not parse a payment made due to a ValueError. Using 0.00")
+        paymentsMade = paymentsMade + 0.00
+      except TypeError:
+        print("Could not parse a payment made due to a TypeError. This could be due to a voided entry or otherwise an entry made of something other than digits, $, commas and periods. Using value of 0.00. ")
+        paymentsMade = paymentsMade + 0.00
   return str(paymentsMade)
   
 def getJailSentence(docket_block):
